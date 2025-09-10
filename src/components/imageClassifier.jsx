@@ -5,7 +5,7 @@ import axios from "axios";
 export default function ImageClassifier() {
   const [model, setModel] = useState(null);
   const [preview, setPreview] = useState(null);
-  const [results, setResults] = useState([]);
+  const [results, setResults] = useState(null);
 
   const modelURL = "/model/model.json";
   const metadataURL = "/model/metadata.json";
@@ -33,24 +33,24 @@ export default function ImageClassifier() {
 
     const imgElement = document.getElementById("uploaded-image");
     const prediction = await model.predict(imgElement);
+
     const highest = prediction.reduce((prev, current) =>
-      (prev.probability > current.probability) ? prev : current
+      prev.probability > current.probability ? prev : current
     );
-    console.log(highest)
-    axios.post("http://localhost:3000/class-info", {
-      pred: highest.className
-    }).then(response => {
-      console.log("Data sent successfully:", response.data);
-    })
-      .catch(error => {
+
+    console.log("Highest prediction:", highest);
+
+    axios
+      .post("http://localhost:3000/class-info", {
+        pred: highest.className,
+      })
+      .then((response) => {
+        setResults(response.data); // 👈 store object
+        console.log("Data sent successfully:", response.data);
+      })
+      .catch((error) => {
         console.error("Error sending data:", error);
       });
-    setResults(
-      prediction.map((p) => ({
-        className: p.className,
-        probability: (p.probability * 100).toFixed(2),
-      }))
-    );
   };
 
   return (
@@ -78,14 +78,18 @@ export default function ImageClassifier() {
 
       {/* Results */}
       <div className="w-full">
-        {results.length > 0 && (
+        {results && (
           <div className="bg-gray-100 p-4 rounded-lg">
             <h2 className="font-semibold mb-2">Prediction Results:</h2>
-            {results.map((r, i) => (
-              <p key={i}>
-                {r.className}: <b>{r.probability}%</b>
-              </p>
-            ))}
+            <p>
+              <strong>Prediction:</strong> {results.pred}
+            </p>
+            <p>
+              <strong>Recyclable:</strong> {results.recyclable}
+            </p>
+            <p>
+              <strong>Description:</strong> {results.description}
+            </p>
           </div>
         )}
       </div>
