@@ -19,15 +19,13 @@ export default function ImageClassifier() {
     loadModel();
   }, []);
 
-  // Handle file upload
   const handleUpload = (event) => {
     const file = event.target.files[0];
     if (!file) return;
-    const url = URL.createObjectURL(file);
-    setPreview(url);
+    setPreview(URL.createObjectURL(file));
+    setResults(null); // Reset previous results
   };
 
-  // Run prediction
   const handlePredict = async () => {
     if (!model || !preview) return;
 
@@ -38,22 +36,12 @@ export default function ImageClassifier() {
       prev.probability > current.probability ? prev : current
     );
 
-    console.log("Highest prediction:", highest);
-
     axios
-      .post("http://localhost:3000/class-info", {
-        pred: highest.className,
-      })
-      .then((response) => {
-        setResults(response.data);
-        console.log("Data sent successfully:", response.data);
-      })
-      .catch((error) => {
-        console.error("Error sending data:", error);
-      });
+      .post("http://localhost:3000/class-info", { pred: highest.className })
+      .then((response) => setResults(response.data))
+      .catch((error) => console.error("Error sending data:", error));
   };
 
-  // Badge color
   const getBadgeColor = (status) => {
     if (status === true) return "bg-green-600";
     if (status === false) return "bg-red-600";
@@ -62,96 +50,98 @@ export default function ImageClassifier() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex flex-col items-center py-10">
-      {/* Title */}
-      <h1 className="text-4xl font-extrabold mb-2 text-green-400 flex items-center gap-2">
-        ♻️ RECYCLE
-      </h1>
-      <p className="mb-8 text-gray-400 text-sm">
-        AI-Powered Waste Analysis & Recycling Intelligence
-      </p>
+    <div className="w-full h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex flex-col overflow-y-auto">
+      {/* Header */}
+      <header className="flex flex-col items-center justify-center py-8 px-4 bg-black/20 backdrop-blur-sm sticky top-0 z-10 shadow-lg">
+        <h1 className="text-5xl font-extrabold mb-2 text-green-400 flex items-center gap-3 animate-pulse">
+          ♻️ RECYCLE
+        </h1>
+        <p className="text-gray-400 text-lg text-center max-w-3xl">
+          AI-Powered Waste Analysis & Recycling Intelligence – Upload your item and get instant disposal guidance.
+        </p>
+      </header>
 
-      {/* Upload Card */}
-      <div className="bg-neutral-900 p-6 rounded-2xl shadow-lg w-full max-w-xl">
-        <h2 className="text-sm mb-2 text-gray-300">Upload Image</h2>
-        <input
-          type="file"
-          accept="image/*"
-          onChange={handleUpload}
-          className="w-full border-2 border-dashed border-gray-600 rounded-md p-4 text-center mb-4 cursor-pointer hover:border-green-400 transition"
-        />
+      {/* Main Content */}
+      <main className="flex-1 flex flex-col md:flex-row items-center justify-evenly px-6 py-10 gap-10 w-full">
+        {/* Upload Card */}
+        <div className="bg-neutral-900 p-8 rounded-3xl shadow-2xl w-full max-w-lg border border-gray-700 flex flex-col items-center">
+          <h2 className="text-xl mb-4 font-semibold text-gray-300">
+            Upload Image
+          </h2>
+          <input
+            type="file"
+            accept="image/*"
+            onChange={handleUpload}
+            className="w-full border-2 border-dashed border-gray-600 rounded-xl p-5 text-center mb-6 cursor-pointer hover:border-green-400 transition-all duration-300 bg-gray-800 text-gray-200"
+          />
 
-        {/* Preview */}
-        {preview && (
-          <div className="flex flex-col items-center">
-            <h2 className="text-sm mb-2 text-gray-300">Preview</h2>
-            <div className="w-full max-w-md h-64 bg-black border border-gray-700 rounded-lg flex items-center justify-center mb-4 overflow-hidden">
-              <img
-                id="uploaded-image"
-                src={preview}
-                alt="Preview"
-                className="object-contain h-full"
-              />
+          {/* Preview + Analyze Button */}
+          {preview && (
+            <>
+              <div className="w-full h-72 bg-black border border-gray-700 rounded-2xl flex items-center justify-center mb-5 overflow-hidden hover:scale-105 transition-transform duration-300">
+                <img
+                  id="uploaded-image"
+                  src={preview}
+                  alt="Preview"
+                  className="object-contain h-full"
+                />
+              </div>
+              <button
+                onClick={handlePredict}
+                className="px-8 py-3 bg-green-500 text-black font-bold rounded-xl hover:bg-green-400 shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+              >
+                Analyze & Get Instructions
+              </button>
+            </>
+          )}
+        </div>
+
+        {/* Results Card */}
+        {results && (
+          <div className="flex-1 flex flex-col w-full max-w-3xl gap-6">
+            <div className="flex justify-center">
+              <span
+                className={`px-8 py-3 rounded-full text-white font-bold text-lg ${getBadgeColor(
+                  results.recyclable
+                )} shadow-lg`}
+              >
+                {results.recyclable === true
+                  ? "RECYCLABLE"
+                  : results.recyclable === false
+                  ? "NOT RECYCLABLE"
+                  : "SPECIAL DISPOSAL"}
+              </span>
             </div>
-            <button
-              onClick={handlePredict}
-              className="px-6 py-3 bg-green-500 text-black font-bold rounded-lg hover:bg-green-400 transition"
-            >
-              Analyze & Get Instructions
-            </button>
+
+            <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-neutral-800 p-6 rounded-2xl shadow-xl border border-gray-700 hover:scale-105 transition-transform duration-300">
+                <h3 className="font-semibold mb-3 text-green-300 text-lg">
+                  Item Details
+                </h3>
+                <p>
+                  <strong>Category:</strong> {results.pred}
+                </p>
+              </div>
+              <div className="bg-neutral-800 p-6 rounded-2xl shadow-xl border border-gray-700 hover:scale-105 transition-transform duration-300">
+                <h3 className="font-semibold mb-3 text-yellow-300 text-lg">
+                  Instructions
+                </h3>
+                <p>{results.instructions}</p>
+              </div>
+            </div>
+
+            <div className="bg-blue-900 p-6 rounded-2xl shadow-xl border-l-4 border-blue-400 hover:shadow-2xl transition-shadow duration-300">
+              <h3 className="font-semibold mb-2 text-lg">💡 Pro Tip</h3>
+              <p>{results.tip}</p>
+            </div>
+
+            <div className="bg-green-900 p-6 rounded-2xl shadow-xl border-l-4 border-green-400 hover:shadow-2xl transition-shadow duration-300">
+              <h3 className="font-semibold mb-2 text-lg">🌍 Environmental Impact</h3>
+              <p>{results.impact}</p>
+            </div>
           </div>
         )}
-      </div>
-
-      {/* Results */}
-      {results && (
-        <div className="w-full max-w-4xl mt-10 space-y-6">
-          {/* Status Badge */}
-          <div className="flex justify-center">
-            <span
-              className={`px-6 py-2 rounded-full text-white font-bold ${getBadgeColor(
-                results.recyclable
-              )}`}
-            >
-              {results.recyclable === true
-                ? "RECYCLABLE"
-                : results.recyclable === false
-                ? "NOT RECYCLABLE"
-                : "SPECIAL DISPOSAL"}
-            </span>
-          </div>
-
-          {/* Item Details + Instructions */}
-          <div className="grid md:grid-cols-2 gap-6">
-            <div className="bg-neutral-800 p-6 rounded-lg shadow-lg">
-              <h3 className="font-semibold mb-3 text-green-300">
-                Item Details
-              </h3>
-              <p>
-                <strong>Category:</strong> {results.pred}
-              </p>
-            </div>
-            <div className="bg-neutral-800 p-6 rounded-lg shadow-lg">
-              <h3 className="font-semibold mb-3 text-yellow-300">
-                Instructions
-              </h3>
-              <p>{results.instructions}</p>
-            </div>
-          </div>
-
-          {/* Pro Tip */}
-          <div className="bg-blue-900 p-6 rounded-lg shadow-lg border-l-4 border-blue-400">
-            <h3 className="font-semibold mb-2">💡 Pro Tip</h3>
-            <p>{results.tip}</p>
-          </div>
-
-          {/* Environmental Impact */}
-          <div className="bg-green-900 p-6 rounded-lg shadow-lg border-l-4 border-green-400">
-            <h3 className="font-semibold mb-2">🌍 Environmental Impact</h3>
-            <p>{results.impact}</p>
-          </div>
-        </div>
-      )}
+      </main>
     </div>
   );
 }
