@@ -28,7 +28,7 @@ const Upload = () => {
       );
 
       const imageUrl = cloudinaryRes.data.secure_url;
-
+      console.log(imageUrl)
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           const latitude = pos.coords.latitude;
