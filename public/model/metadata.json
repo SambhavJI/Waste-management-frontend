@@ -3,13 +3,14 @@
     "tmVersion": "2.4.10",
     "packageVersion": "0.8.4-alpha2",
     "packageName": "@teachablemachine/image",
-    "timeStamp": "2025-09-01T06:19:34.912Z",
+    "timeStamp": "2025-09-11T10:46:40.660Z",
     "userMetadata": {},
-    "modelName": "projet exhibition",
+    "modelName": "final model",
     "labels": [
-        "non biodegradable",
-        "ewaste",
-        "biodegradable"
+        "Ewaste",
+        "Dry Waste",
+        "Wet waste ",
+        "Unidentified"
     ],
     "imageSize": 224
 }

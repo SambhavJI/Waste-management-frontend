@@ -6,6 +6,7 @@ export default function ImageClassifier() {
   const [model, setModel] = useState(null);
   const [preview, setPreview] = useState(null);
   const [results, setResults] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   const modelURL = "/model/model.json";
   const metadataURL = "/model/metadata.json";
@@ -23,23 +24,33 @@ export default function ImageClassifier() {
     const file = event.target.files[0];
     if (!file) return;
     setPreview(URL.createObjectURL(file));
-    setResults(null); // Reset previous results
+    setResults(null); 
   };
 
   const handlePredict = async () => {
     if (!model || !preview) return;
+    setLoading(true);
 
-    const imgElement = document.getElementById("uploaded-image");
-    const prediction = await model.predict(imgElement);
+    try {
+      const imgElement = document.getElementById("uploaded-image");
+      const prediction = await model.predict(imgElement);
 
-    const highest = prediction.reduce((prev, current) =>
-      prev.probability > current.probability ? prev : current
-    );
+      const highest = prediction.reduce((prev, current) =>
+        prev.probability > current.probability ? prev : current
+      );
+      console.log(highest)
+      const response = await axios.post(
+        "http://localhost:3000/class-info",
+        { pred: highest.className },
+        { withCredentials: true }
+      );
 
-    axios
-      .post("http://localhost:3000/class-info", { pred: highest.className })
-      .then((response) => setResults(response.data))
-      .catch((error) => console.error("Error sending data:", error));
+      setResults(response.data);
+    } catch (error) {
+      console.error("Error sending data:", error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const getBadgeColor = (status) => {
@@ -50,7 +61,7 @@ export default function ImageClassifier() {
   };
 
   return (
-    <div className="w-full h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex flex-col overflow-y-auto">
+    <div className="w-full min-h-screen bg-gradient-to-br from-gray-900 via-black to-gray-800 text-white flex flex-col overflow-y-auto">
       {/* Header */}
       <header className="flex flex-col items-center justify-center py-8 px-4 bg-black/20 backdrop-blur-sm sticky top-0 z-10 shadow-lg">
         <h1 className="text-5xl font-extrabold mb-2 text-green-400 flex items-center gap-3 animate-pulse">
@@ -88,9 +99,10 @@ export default function ImageClassifier() {
               </div>
               <button
                 onClick={handlePredict}
-                className="px-8 py-3 bg-green-500 text-black font-bold rounded-xl hover:bg-green-400 shadow-lg transition-all duration-300 transform hover:-translate-y-1"
+                disabled={loading}
+                className="px-8 py-3 bg-green-500 text-black font-bold rounded-xl hover:bg-green-400 shadow-lg transition-all duration-300 transform hover:-translate-y-1 disabled:opacity-50"
               >
-                Analyze & Get Instructions
+                {loading ? "Analyzing..." : "Analyze & Get Instructions"}
               </button>
             </>
           )}
