@@ -13,7 +13,7 @@ function AppLayout() {
       <div className="w-full mt-0 pt-0">
         <Outlet />
       </div>
-    </div>
+    </div>     
   );
 }
 

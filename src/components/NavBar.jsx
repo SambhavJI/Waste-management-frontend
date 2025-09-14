@@ -38,7 +38,7 @@ export default function NavBar() {
           </ul>
         </div>
         <Link to="/" className="btn btn-ghost text-xl">
-          Recylify
+          Recyclify
         </Link>
       </div>
 
