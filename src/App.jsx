@@ -5,6 +5,7 @@ import Upload from "./components/Upload";
 import ImageClassifier from "./components/imageClassifier.jsx";
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
+import {AuthProvider} from "./components/AuthContext";
 
 function AppLayout() {
   return (
@@ -13,27 +14,29 @@ function AppLayout() {
       <div className="w-full mt-0 pt-0">
         <Outlet />
       </div>
-    </div>     
+    </div>
   );
 }
 
-
-// 👇 Define routes
 const router = createBrowserRouter([
   {
     path: "/",
     element: <AppLayout />,
     children: [
-      { index: true, element: <ImageClassifier /> }, 
+      { index: true, element: <ImageClassifier /> },
       { path: "upload", element: <Upload /> },
-      {path:"login",element:<Login />},      
-      {path:"signUp",element:<SignUp />},      
+      { path: "login", element: <Login /> },
+      { path: "signUp", element: <SignUp /> },
     ],
   },
 ]);
 
 function App() {
-  return <RouterProvider router={router} />;
+  return (
+    <AuthProvider>
+      <RouterProvider router={router} />
+    </AuthProvider>
+  );
 }
 
 export default App;

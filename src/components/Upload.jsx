@@ -13,7 +13,7 @@ const Upload = () => {
   };
 
   const handleUpload = async () => {
-    if (!file) return alert("Please select an image first");
+    if (!file) return alert("❌ Please select an image first");
     setLoading(true);
 
     try {
@@ -28,30 +28,38 @@ const Upload = () => {
       );
 
       const imageUrl = cloudinaryRes.data.secure_url;
-      console.log(imageUrl)
+
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
-          const latitude = pos.coords.latitude;
-          const longitude = pos.coords.longitude;
+          try {
+            const latitude = pos.coords.latitude;
+            const longitude = pos.coords.longitude;
 
-          await axios.post("http://localhost:3000/upload", {
-            latitude,
-            longitude,
-            image: imageUrl,
-          },{ withCredentials: true }  );
+            const res = await axios.post(
+              "http://localhost:3000/upload",
+              { latitude, longitude, image: imageUrl },
+              { withCredentials: true }
+            );
 
-          alert("Info uploaded successfully ✅");
-          setLoading(false);
+            alert(`✅ ${res.data.message}`);
+          } catch (err) {
+            console.error("Backend upload failed:", err);
+            const errorMsg = err.response?.data?.error || "Upload failed on server";
+            alert(`❌ ${errorMsg}`);
+          } finally {
+            setLoading(false);
+          }
         },
-        (err) => {
-          console.error("Geolocation error:", err);
-          alert("Failed to get location");
+        (geoErr) => {
+          console.error("Geolocation error:", geoErr);
+          alert("❌ Failed to get location");
           setLoading(false);
         }
       );
     } catch (err) {
-      console.error("Upload failed:", err);
-      alert("Upload failed. Check console for details.");
+      console.error("Cloudinary upload failed:", err);
+      const errorMsg = err.response?.data?.error || "Upload to Cloudinary failed";
+      alert(`❌ ${errorMsg}`);
       setLoading(false);
     }
   };

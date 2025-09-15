@@ -12,16 +12,23 @@ export default function Signup() {
     setLoading(true);
 
     try {
-      const res = await axios.post("http://localhost:3000/signup", {
-        name,
-        email,
-        password,
-      },{ withCredentials: true });
-      alert("✅ Signup successful!");
+      const res = await axios.post(
+        "http://localhost:3000/signup",
+        { name, email, password },
+        { withCredentials: true }
+      );
+
+      alert(`✅ ${res.data.message}`);
       console.log(res.data);
     } catch (err) {
       console.error("Signup failed:", err);
-      alert("❌ Could not register");
+
+      if (err.response && err.response.data) {
+        const errorMsg = err.response.data.error || "Something went wrong";
+        alert(`❌ ${errorMsg}`);
+      } else {
+        alert("❌ Network error, please try again.");
+      }
     } finally {
       setLoading(false);
     }
