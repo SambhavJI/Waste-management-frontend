@@ -2,10 +2,11 @@ import React from "react";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import NavBar from "./components/NavBar";
 import Upload from "./components/Upload";
-import ImageClassifier from "./components/imageClassifier.jsx";
+import ImageClassifier from "./components/imageClassifier"; 
 import Login from "./components/Login";
 import SignUp from "./components/SignUp";
-import {AuthProvider} from "./components/AuthContext";
+import { AuthProvider } from "./components/AuthContext";
+import Quiz from "./components/Quiz";
 
 function AppLayout() {
   return (
@@ -27,6 +28,7 @@ const router = createBrowserRouter([
       { path: "upload", element: <Upload /> },
       { path: "login", element: <Login /> },
       { path: "signUp", element: <SignUp /> },
+      { path: "quiz/:category", element: <Quiz /> }, 
     ],
   },
 ]);

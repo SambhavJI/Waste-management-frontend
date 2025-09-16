@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from "react";
 import * as tmImage from "@teachablemachine/image";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
 
 export default function ImageClassifier() {
   const [model, setModel] = useState(null);
   const [preview, setPreview] = useState(null);
   const [results, setResults] = useState(null);
+  const [predictedClass, setPredictedClass] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  const navigate = useNavigate();
 
   const modelURL = "/model/model.json";
   const metadataURL = "/model/metadata.json";
@@ -24,7 +28,8 @@ export default function ImageClassifier() {
     const file = event.target.files[0];
     if (!file) return;
     setPreview(URL.createObjectURL(file));
-    setResults(null); 
+    setResults(null);
+    setPredictedClass(null);
   };
 
   const handlePredict = async () => {
@@ -38,7 +43,10 @@ export default function ImageClassifier() {
       const highest = prediction.reduce((prev, current) =>
         prev.probability > current.probability ? prev : current
       );
-      console.log(highest)
+      console.log("📊 Prediction:", highest);
+
+      setPredictedClass(highest.className);
+
       const response = await axios.post(
         "http://localhost:3000/class-info",
         { pred: highest.className },
@@ -51,6 +59,14 @@ export default function ImageClassifier() {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleQuizRedirect = () => {
+    if (!predictedClass) {
+      alert("Please analyze an image first!");
+      return;
+    }
+    navigate(`/quiz/${predictedClass.toLowerCase()}`);
   };
 
   const getBadgeColor = (status) => {
@@ -150,6 +166,16 @@ export default function ImageClassifier() {
             <div className="bg-green-900 p-6 rounded-2xl shadow-xl border-l-4 border-green-400 hover:shadow-2xl transition-shadow duration-300">
               <h3 className="font-semibold mb-2 text-lg">🌍 Environmental Impact</h3>
               <p>{results.impact}</p>
+            </div>
+
+            {/* Take Quiz Button */}
+            <div className="flex justify-center mt-6">
+              <button
+                onClick={handleQuizRedirect}
+                className="px-8 py-3 bg-indigo-500 text-white font-bold rounded-xl hover:bg-indigo-400 shadow-lg transition-all duration-300"
+              >
+                Take {predictedClass} Quiz
+              </button>
             </div>
           </div>
         )}
