@@ -17,7 +17,6 @@ const Upload = () => {
     setLoading(true);
 
     try {
-      // Upload to Cloudinary
       const formData = new FormData();
       formData.append("file", file);
       formData.append("upload_preset", import.meta.env.VITE_CLOUDINARY_UPLOAD_PRESET);
@@ -29,22 +28,31 @@ const Upload = () => {
 
       const imageUrl = cloudinaryRes.data.secure_url;
 
+      console.log(document.cookie);
+
       navigator.geolocation.getCurrentPosition(
         async (pos) => {
           try {
             const latitude = pos.coords.latitude;
             const longitude = pos.coords.longitude;
+            const res = await fetch(`${import.meta.env.VITE_API_URL}/upload`, {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json'
+              },
+              body: JSON.stringify({ latitude, longitude, image: imageUrl }),
+              credentials: "include"
+            });
 
-            const res = await axios.post(
-              "http://localhost:3000/upload",
-              { latitude, longitude, image: imageUrl },
-              { withCredentials: true }
-            );
+            const data = await res.json();
+            if (!res.ok) {
+              throw new Error(data.error || 'Upload failed on server');
+            }
 
-            alert(`✅ ${res.data.message}`);
+            alert(`✅ ${data.message}`);
           } catch (err) {
             console.error("Backend upload failed:", err);
-            const errorMsg = err.response?.data?.error || "Upload failed on server";
+            const errorMsg = err.message || "Upload failed on server";
             alert(`❌ ${errorMsg}`);
           } finally {
             setLoading(false);

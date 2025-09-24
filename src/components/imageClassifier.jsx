@@ -48,7 +48,7 @@ export default function ImageClassifier() {
       setPredictedClass(highest.className);
 
       const response = await axios.post(
-        "http://localhost:3000/class-info",
+        `${import.meta.env.VITE_API_URL}/class-info`,
         { pred: highest.className },
         { withCredentials: true }
       );

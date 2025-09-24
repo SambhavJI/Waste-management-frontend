@@ -16,10 +16,11 @@ export default function Login() {
 
     try {
       const res = await axios.post(
-        "http://localhost:3000/login",
+        `${import.meta.env.VITE_API_URL}/login`,
         { email, password },
         { withCredentials: true }
       );
+
 
       alert(`✅ ${res.data.message}`);
       login(res.data.user); // <-- update global auth state
