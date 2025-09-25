@@ -1,81 +1,72 @@
 import { Link } from "react-router-dom";
 import { useContext } from "react";
 import { AuthContext } from "../components/AuthContext";
+import { motion } from "framer-motion";
 
 export default function NavBar() {
   const { user, logout } = useContext(AuthContext);
 
   return (
-    <div className="navbar bg-base-100 shadow-sm">
-      <div className="navbar-start">
-        <div className="dropdown">
-          <div tabIndex={0} role="button" className="btn btn-ghost lg:hidden">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              className="h-5 w-5"
-              fill="none"
-              viewBox="0 0 24 24"
-              stroke="currentColor"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth="2"
-                d="M4 6h16M4 12h8m-8 6h16"
-              />
-            </svg>
-          </div>
-          <ul
-            tabIndex={0}
-            className="menu menu-sm dropdown-content bg-base-100 rounded-box z-1 mt-3 w-52 p-2 shadow"
-          >
-            <li>
-              <Link to="/upload" className="btn btn-primary w-full">
-                Recycle
-              </Link>
-            </li>
-            <li>
-              <Link to="/" className="btn btn-secondary w-full">
-                Info
-              </Link>
-            </li>
-          </ul>
+    <motion.nav
+      initial={{ y: -80, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.6, ease: "easeOut" }}
+      className="fixed top-0 left-0 w-full z-50 backdrop-blur-lg shadow-md 
+                 bg-gradient-to-r from-green-500/80 via-teal-500/70 to-blue-500/80"
+    >
+      <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+        
+        {/* Logo */}
+        <Link to="/" className="text-2xl font-extrabold text-white tracking-wide">
+          ♻ Recyclify
+        </Link>
+
+        {/* Links (Desktop) */}
+        <div className="hidden md:flex space-x-6">
+          <NavLink to="/upload" label="Recycle" />
+          <NavLink to="/" label="Info" />
         </div>
-        <Link to="/" className="btn btn-ghost text-xl">
-          Recyclify
-        </Link>
-      </div>
 
-      <div className="navbar-center hidden lg:flex gap-2">
-        <Link to="/upload" className="btn btn-primary">
-          Recycle
-        </Link>
-        <Link to="/" className="btn btn-secondary">
-          Info
-        </Link>
+        {/* Auth Buttons */}
+        <div className="flex items-center space-x-4">
+          {user ? (
+            <button
+              onClick={logout}
+              className="px-4 py-2 rounded-xl bg-red-500 text-white font-semibold
+                         hover:bg-red-600 transition duration-300 shadow-md"
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link to="/login">
+                <button className="px-4 py-2 rounded-xl bg-white/20 text-white font-semibold
+                                   hover:bg-white/40 transition duration-300 shadow-md">
+                  Login
+                </button>
+              </Link>
+              <Link to="/signUp">
+                <button className="px-4 py-2 rounded-xl bg-yellow-400 text-black font-semibold
+                                   hover:bg-yellow-300 transition duration-300 shadow-md">
+                  Sign Up
+                </button>
+              </Link>
+            </>
+          )}
+        </div>
       </div>
+    </motion.nav>
+  );
+}
 
-      <div className="navbar-end flex gap-2">
-        {user ? (
-          <button
-            className="btn btn-error"
-            onClick={() => {
-              logout();
-            }}
-          >
-            Logout
-          </button>
-        ) : (
-          <>
-            <Link to="/login">
-              <button className="btn">Login</button>
-            </Link>
-            <Link to="/signUp">
-              <button className="btn">Sign Up</button>
-            </Link>
-          </>
-        )}
-      </div>
-    </div>
+function NavLink({ to, label }) {
+  return (
+    <Link
+      to={to}
+      className="relative text-white font-medium tracking-wide hover:text-yellow-300 transition duration-300"
+    >
+      {label}
+      <span className="absolute left-0 -bottom-1 w-0 h-[2px] bg-yellow-300 transition-all duration-300 hover:w-full"></span>
+    </Link>
   );
 }

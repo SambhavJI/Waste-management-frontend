@@ -1,5 +1,6 @@
 import { createContext, useState, useEffect } from "react";
 import axios from "axios";
+import { toast } from 'react-hot-toast';
 
 export const AuthContext = createContext();
 
@@ -21,10 +22,10 @@ export const AuthProvider = ({ children }) => {
       await axios.post(`${import.meta.env.VITE_API_URL}/logout`, {}, { withCredentials: true });
       setUser(null);
       localStorage.removeItem("user");
-      alert("✅ Logout successful");
+      toast.success("Logout successful");
     } catch (err) {
       console.error("Logout failed:", err);
-      alert("❌ Logout failed, try again.");
+      toast.error("Logout failed, try again.");
     }
   };
 
