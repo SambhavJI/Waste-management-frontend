@@ -1,10 +1,12 @@
 import { Link } from "react-router-dom";
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import { AuthContext } from "../components/AuthContext";
 import { motion } from "framer-motion";
+import { Menu, X } from "lucide-react"; // hamburger + close icons
 
 export default function NavBar() {
   const { user, logout } = useContext(AuthContext);
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <motion.nav
@@ -21,14 +23,14 @@ export default function NavBar() {
           ♻ Recyclify
         </Link>
 
-        {/* Links (Desktop) */}
+        {/* Desktop Links */}
         <div className="hidden md:flex space-x-6">
           <NavLink to="/upload" label="Recycle" />
-          <NavLink to="/" label="Info" />
+          <NavLink to="/classify" label="Info" />
         </div>
 
-        {/* Auth Buttons */}
-        <div className="flex items-center space-x-4">
+        {/* Auth Buttons (Desktop) */}
+        <div className="hidden md:flex items-center space-x-4">
           {user ? (
             <button
               onClick={logout}
@@ -54,7 +56,51 @@ export default function NavBar() {
             </>
           )}
         </div>
+
+        {/* Mobile Hamburger */}
+        <button
+          className="md:hidden text-white"
+          onClick={() => setIsOpen(!isOpen)}
+        >
+          {isOpen ? <X size={28} /> : <Menu size={28} />}
+        </button>
       </div>
+
+      {/* Mobile Menu */}
+      {isOpen && (
+        <div className="md:hidden flex flex-col items-center space-y-4 py-4 bg-gradient-to-b from-green-600/90 to-blue-600/90 text-white">
+          <NavLink to="/upload" label="Recycle" />
+          <NavLink to="/classify" label="Info" />
+
+          {user ? (
+            <button
+              onClick={() => {
+                logout();
+                setIsOpen(false);
+              }}
+              className="px-4 py-2 rounded-xl bg-red-500 text-white font-semibold
+                         hover:bg-red-600 transition duration-300 shadow-md"
+            >
+              Logout
+            </button>
+          ) : (
+            <>
+              <Link to="/login" onClick={() => setIsOpen(false)}>
+                <button className="w-full px-4 py-2 rounded-xl bg-white/20 text-white font-semibold
+                                   hover:bg-white/40 transition duration-300 shadow-md">
+                  Login
+                </button>
+              </Link>
+              <Link to="/signUp" onClick={() => setIsOpen(false)}>
+                <button className="w-full px-4 py-2 rounded-xl bg-yellow-400 text-black font-semibold
+                                   hover:bg-yellow-300 transition duration-300 shadow-md">
+                  Sign Up
+                </button>
+              </Link>
+            </>
+          )}
+        </div>
+      )}
     </motion.nav>
   );
 }
