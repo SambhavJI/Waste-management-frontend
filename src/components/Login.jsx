@@ -25,7 +25,7 @@ export default function Login() {
 
       toast.success(`${res.data.message}`);
       login(res.data.user);
-      navigate("/");
+      navigate("/classify");
     } catch (err) {
       console.error("Login failed:", err);
       if (err.response && err.response.data) {
